@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+type GroupSet []interface{}
+
 func numInput(query string) int {
 
 	var (
@@ -120,6 +122,15 @@ func isInsert(query string) bool {
 }
 
 func quote(v driver.Value) string {
+	switch v := v.(type) {
+	case GroupSet:
+		values := make([]string, 0, len(v))
+		for i := 0; i < len(v); i++ {
+			values = append(values, quote(v[i]))
+		}
+		return "(" + strings.Join(values, ", ") + ")"
+
+	}
 	switch v := reflect.ValueOf(v); v.Kind() {
 	case reflect.Slice:
 		values := make([]string, 0, v.Len())
